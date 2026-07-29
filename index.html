@@ -1,0 +1,545 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Photon DB Docs</title>
+<style>
+  :root{
+    --bg:#14161d;
+    --bg-elevated:#1b1e27;
+    --bg-card:#20232e;
+    --border:#2c303c;
+    --text:#e3e6ee;
+    --text-dim:#9096a8;
+    --text-faint:#6b7086;
+    --accent:#5ce1e6;
+    --accent-soft:rgba(92,225,230,0.12);
+    --mono:'JetBrains Mono','Fira Code',ui-monospace,Consolas,monospace;
+    --sans:'Inter',-apple-system,BlinkMacSystemFont,'Segoe UI',sans-serif;
+  }
+  *{box-sizing:border-box;}
+  html{scroll-behavior:smooth;}
+  body{
+    margin:0; background:var(--bg); color:var(--text);
+    font-family:var(--sans); font-size:15px; line-height:1.65;
+    display:flex; min-height:100vh;
+  }
+  a{color:inherit;}
+  code{font-family:var(--mono);}
+
+  /* ===== Topbar ===== */
+  .topbar{
+    position:fixed; top:0; left:0; right:0; height:56px;
+    background:rgba(20,22,29,0.92); backdrop-filter:blur(10px);
+    border-bottom:1px solid var(--border);
+    display:flex; align-items:center; gap:18px; padding:0 20px;
+    z-index:50;
+  }
+  .brand{display:flex; align-items:center; gap:10px; font-weight:700; font-size:15px; letter-spacing:0.2px; white-space:nowrap;}
+  .brand-mark{
+    width:26px; height:26px; border-radius:7px;
+    background:conic-gradient(from 200deg, var(--accent), #7c7cf0, var(--accent));
+    display:flex; align-items:center; justify-content:center;
+    font-size:12px; font-weight:800; color:#0d0f14;
+  }
+  .ver-pill{
+    font-size:11px; color:var(--text-dim); background:var(--bg-elevated);
+    border:1px solid var(--border); padding:2px 8px; border-radius:20px;
+  }
+  .search-box{
+    flex:1; max-width:420px; height:34px; background:var(--bg-elevated);
+    border:1px solid var(--border); border-radius:8px;
+    display:flex; align-items:center; padding:0 10px; gap:8px;
+    color:var(--text-faint); font-size:13px; cursor:pointer;
+  }
+  .search-box kbd{
+    margin-left:auto; font-size:10px; background:#282c38; border-radius:4px;
+    padding:2px 5px; color:var(--text-dim); font-family:var(--sans);
+  }
+  .top-links{display:flex; gap:22px; margin-left:auto; font-size:13.5px; color:var(--text-dim);}
+  .top-links a{padding:6px 2px; border-bottom:2px solid transparent;}
+  .top-links a.active{color:var(--accent); border-color:var(--accent);}
+  .top-links a:hover{color:var(--text);}
+  .top-icon{width:32px; height:32px; border-radius:8px; display:flex; align-items:center; justify-content:center; color:var(--text-dim);}
+  .top-icon:hover{background:var(--bg-elevated); color:var(--text);}
+  .mobile-toggle{display:none; background:none; border:none; color:var(--text); cursor:pointer; padding:6px;}
+
+  /* ===== Sidebar ===== */
+  .sidebar{
+    position:fixed; top:56px; bottom:0; left:0; width:260px;
+    background:var(--bg); border-right:1px solid var(--border);
+    overflow-y:auto; padding:22px 14px 60px;
+    z-index:40;
+  }
+  .side-group{margin-bottom:22px;}
+  .side-label{
+    font-size:11px; font-weight:700; letter-spacing:0.08em; color:var(--text-faint);
+    padding:6px 10px; text-transform:uppercase;
+  }
+  .side-link{
+    display:flex; align-items:center; justify-content:space-between;
+    gap:8px; padding:7px 10px; border-radius:6px; font-size:13.5px;
+    color:var(--text-dim); cursor:pointer; text-decoration:none;
+  }
+  .side-link:hover{background:var(--bg-elevated); color:var(--text);}
+  .side-link.active{background:var(--accent-soft); color:var(--accent); font-weight:600;}
+  .side-link .chev{color:var(--text-faint); font-size:11px;}
+  .side-sub{padding-left:18px; margin-top:2px;}
+  hr.side-rule{border:none; border-top:1px solid var(--border); margin:14px 6px;}
+
+  /* ===== Main ===== */
+  .main-wrap{margin-left:260px; margin-top:56px; flex:1; display:flex; justify-content:space-between; min-width:0;}
+  .content{max-width:800px; padding:44px 56px 120px; min-width:0; flex:1;}
+  .breadcrumb{
+    font-size:12.5px; font-weight:700; letter-spacing:0.05em; color:var(--accent);
+    text-transform:uppercase; display:flex; align-items:center; gap:6px; margin-bottom:14px;
+  }
+  h1.page-title{font-size:38px; font-weight:800; margin:0 0 18px; letter-spacing:-0.02em;}
+  .lede{font-size:17px; color:var(--text-dim); max-width:640px; margin-bottom:26px;}
+  .callout{
+    background:var(--bg-card); border:1px solid var(--border); border-radius:12px;
+    padding:22px 26px; margin:26px 0;
+  }
+  .callout h3{margin:0 0 12px; font-size:19px; font-weight:800;}
+  .callout ul{margin:0; padding-left:20px;}
+  .callout li{margin:7px 0; color:var(--text);}
+  h2{font-size:25px; font-weight:800; margin:44px 0 12px; letter-spacing:-0.01em; scroll-margin-top:80px;}
+  h3{font-size:18px; font-weight:700; margin:28px 0 8px; color:var(--text); scroll-margin-top:80px;}
+  p{color:#c7cbda;}
+  .content section p, .content section li{color:#c7cbda;}
+  .content strong{color:var(--text);}
+  .content em{color:var(--accent); font-style:italic;}
+  pre{
+    background:#0f1116; border:1px solid var(--border); border-radius:10px;
+    padding:16px 18px; overflow-x:auto; font-size:13px; line-height:1.6; margin:14px 0;
+  }
+  pre code{color:#a8ffcf;}
+  p code, li code, td code{
+    background:var(--bg-elevated); border:1px solid var(--border); border-radius:4px;
+    padding:1px 6px; font-size:12.5px; color:var(--accent);
+  }
+  table{width:100%; border-collapse:collapse; margin:16px 0; font-size:13.5px;}
+  th{text-align:left; color:var(--text-faint); font-weight:600; padding:9px 10px; border-bottom:1px solid var(--border); font-size:12px; text-transform:uppercase; letter-spacing:0.04em;}
+  td{padding:10px 10px; border-bottom:1px solid var(--border); color:#c7cbda;}
+  .badge-row{display:flex; gap:8px; flex-wrap:wrap; margin:14px 0;}
+  .badge{
+    font-size:12px; padding:4px 10px; border-radius:20px; border:1px solid var(--border);
+    color:var(--text-dim); background:var(--bg-elevated);
+  }
+  .grid-cards{display:grid; grid-template-columns:1fr 1fr; gap:14px; margin:20px 0;}
+  .card{background:var(--bg-card); border:1px solid var(--border); border-radius:10px; padding:16px 18px;}
+  .card .k{font-family:var(--mono); font-size:13px; color:var(--accent); font-weight:700; margin-bottom:6px;}
+  .card .d{font-size:13px; color:var(--text-dim);}
+  .warn{border-left:3px solid #e6b85c; background:rgba(230,184,92,0.08); padding:12px 16px; border-radius:6px; margin:16px 0; font-size:13.5px; color:#e6d3a8;}
+  .page{display:none;}
+  .page.active{display:block;}
+
+  /* right toc */
+  .toc{width:220px; padding:44px 24px 0 0; flex-shrink:0;}
+  .toc-title{font-size:11px; text-transform:uppercase; letter-spacing:0.06em; color:var(--text-faint); font-weight:700; margin-bottom:10px;}
+  .toc a{display:block; font-size:13px; color:var(--text-dim); padding:5px 0; border-left:2px solid transparent; padding-left:12px;}
+  .toc a:hover{color:var(--text);}
+  .toc a.active{color:var(--accent); border-color:var(--accent);}
+
+  @media (max-width:1100px){ .toc{display:none;} }
+  @media (max-width:860px){
+    .sidebar{transform:translateX(-100%); transition:transform .2s ease; width:78%; max-width:300px; box-shadow:0 0 40px rgba(0,0,0,.5);}
+    .sidebar.open{transform:translateX(0);}
+    .main-wrap{margin-left:0;}
+    .content{padding:30px 22px 100px;}
+    .top-links{display:none;}
+    .mobile-toggle{display:block;}
+    .search-box{display:none;}
+  }
+</style>
+</head>
+<body>
+
+<div class="topbar">
+  <button class="mobile-toggle" onclick="document.querySelector('.sidebar').classList.toggle('open')">☰</button>
+  <div class="brand"><div class="brand-mark">λ</div> Photon DB</div>
+  <span class="ver-pill">v0.1 · in development</span>
+  <div class="search-box">🔍 Search docs <kbd>⌘K</kbd></div>
+  <div class="top-links">
+    <a class="active" href="#">Docs</a>
+    <a href="#" onclick="go('commands');return false;">Commands</a>
+    <a href="#" onclick="go('architecture');return false;">Architecture</a>
+    <a href="#" onclick="go('contributing');return false;">Contributing</a>
+  </div>
+  <a class="top-icon" href="https://github.com/AmritPant/photon-db" target="_blank" title="GitHub">
+    <svg width="18" height="18" viewBox="0 0 16 16" fill="currentColor"><path d="M8 0C3.58 0 0 3.58 0 8a8 8 0 0 0 5.47 7.59c.4.07.55-.17.55-.38 0-.19-.01-.82-.01-1.49-2.01.37-2.53-.49-2.69-.94-.09-.23-.48-.94-.82-1.13-.28-.15-.68-.52-.01-.53.63-.01 1.08.58 1.23.82.72 1.21 1.87.87 2.33.66.07-.52.28-.87.51-1.07-1.78-.2-3.64-.89-3.64-3.95 0-.87.31-1.59.82-2.15-.08-.2-.36-1.02.08-2.12 0 0 .67-.21 2.2.82a7.6 7.6 0 0 1 4 0c1.53-1.04 2.2-.82 2.2-.82.44 1.1.16 1.92.08 2.12.51.56.82 1.27.82 2.15 0 3.07-1.87 3.75-3.65 3.95.29.25.54.73.54 1.48 0 1.07-.01 1.93-.01 2.2 0 .21.15.46.55.38A8 8 0 0 0 16 8c0-4.42-3.58-8-8-8Z"/></svg>
+  </a>
+</div>
+
+<div class="sidebar">
+  <div class="side-group">
+    <div class="side-label">Get Started</div>
+    <a class="side-link active" onclick="go('quickstart')">Quick Start</a>
+    <a class="side-link" onclick="go('install')">Installation</a>
+    <a class="side-link" onclick="go('workflow')">Dev Workflow</a>
+  </div>
+  <hr class="side-rule">
+  <div class="side-group">
+    <div class="side-label">Reference</div>
+    <a class="side-link" onclick="go('architecture')">Architecture</a>
+    <a class="side-link" onclick="go('commands')">Commands</a>
+    <a class="side-link" onclick="go('persistence')">Persistence (RDB / AOF)</a>
+  </div>
+  <hr class="side-rule">
+  <div class="side-group">
+    <div class="side-label">Project</div>
+    <a class="side-link" onclick="go('contributing')">Contributing</a>
+    <a class="side-link" onclick="go('troubleshoot')">Troubleshooting</a>
+  </div>
+</div>
+
+<div class="main-wrap">
+<div class="content" id="content">
+
+  <!-- QUICK START -->
+  <section class="page active" id="quickstart">
+    <div class="breadcrumb">GET STARTED ›</div>
+    <h1 class="page-title">Quick Start</h1>
+    <p class="lede">Photon DB is an in-memory, Redis-style key-value database written in C++ from scratch, built as a semester project and modeled after the CodeCrafters "Build Your Own Redis" challenge.</p>
+
+    <div class="callout">
+      <h3>You will learn</h3>
+      <ul>
+        <li>What Photon DB is and how it's structured</li>
+        <li>How to build and run it with Docker — no local C++ toolchain needed</li>
+        <li>How to talk to the server with <code>redis-cli</code></li>
+        <li>Where the RESP parser, dispatcher, and command handlers live</li>
+        <li>How persistence works via RDB snapshots and an AOF log</li>
+        <li>How to contribute a new command or fix</li>
+      </ul>
+    </div>
+
+    <h2 id="what-is">What is Photon DB?</h2>
+    <p>Photon DB speaks the <strong>RESP protocol</strong> (the same wire protocol Redis uses), so any Redis client — including <code>redis-cli</code> — can talk to it directly on port <code>6379</code>. The whole team builds and runs it inside <strong>Docker</strong>, so everyone compiles against the same toolchain regardless of whether they're on Windows, macOS, or Linux.</p>
+
+    <div class="grid-cards">
+      <div class="card"><div class="k">Language</div><div class="d">C++</div></div>
+      <div class="card"><div class="k">Protocol</div><div class="d">RESP (Redis wire protocol)</div></div>
+      <div class="card"><div class="k">Default Port</div><div class="d">6379</div></div>
+      <div class="card"><div class="k">Build</div><div class="d">Docker + Makefile</div></div>
+    </div>
+
+    <h2 id="try-it">Try it in 60 seconds</h2>
+    <pre><code>git clone https://github.com/AmritPant/photon-db
+cd photon-db
+docker compose build
+docker compose run --rm dev
+
+# inside the container
+make
+./photondb</code></pre>
+    <p>From a second terminal, attach to the running container and connect with <code>redis-cli</code>:</p>
+    <pre><code>docker ps
+docker exec -it &lt;container-name&gt; /bin/bash
+redis-cli -p 6379
+
+127.0.0.1:6379&gt; PING
+PONG
+127.0.0.1:6379&gt; SET foo bar
+OK
+127.0.0.1:6379&gt; GET foo
+"bar"</code></pre>
+    <p>Full setup details are on the <a onclick="go('install')" style="color:var(--accent); cursor:pointer;">Installation</a> page.</p>
+  </section>
+
+  <!-- INSTALLATION -->
+  <section class="page" id="install">
+    <div class="breadcrumb">GET STARTED ›</div>
+    <h1 class="page-title">Installation</h1>
+    <p class="lede">You only need two tools installed on your machine — everything else runs inside a container.</p>
+
+    <h2 id="requirements">Requirements</h2>
+    <div class="badge-row">
+      <span class="badge">Git</span>
+      <span class="badge">Docker Desktop</span>
+    </div>
+    <p>You do <strong>not</strong> need to install C++, <code>g++</code>, or <code>make</code> on your host machine — the Docker image already has them.</p>
+
+    <h2 id="step1">Step 1 — Get the code</h2>
+    <pre><code>git clone https://github.com/AmritPant/photon-db
+cd photon-db</code></pre>
+
+    <h2 id="step2">Step 2 — Build the Docker environment</h2>
+    <pre><code>docker compose build</code></pre>
+    <p>This pulls down a Linux image with the compiler and tools (<code>g++</code>, <code>make</code>, <code>redis-cli</code>). It can take a few minutes on the first run and will be much faster afterward.</p>
+
+    <h2 id="step3">Step 3 — Open a dev shell and start the server</h2>
+    <pre><code>docker compose run --rm dev</code></pre>
+    <p>This drops you inside the container with the project mounted at <code>/workspace</code>. From here:</p>
+    <pre><code>make
+./photondb</code></pre>
+    <p><code>make</code> compiles the project into the <code>photondb</code> binary. <code>./photondb</code> starts the server on port <code>6379</code> and keeps running in the foreground — leave this terminal open.</p>
+
+    <div class="warn">⚠️ <strong>Port already in use?</strong> Something else on your machine is using 6379. Stop it, or remap the port by changing <code>6379:6379</code> to e.g. <code>6380:6379</code> in <code>docker-compose.yml</code>.</div>
+  </section>
+
+  <!-- WORKFLOW -->
+  <section class="page" id="workflow">
+    <div class="breadcrumb">GET STARTED ›</div>
+    <h1 class="page-title">Dev Workflow</h1>
+    <p class="lede">The day-to-day loop for building, running, and testing Photon DB against a real Redis client.</p>
+
+    <h2 id="second-shell">Connecting a second shell</h2>
+    <p>The server runs in the foreground inside one container shell. To send it commands with <code>redis-cli</code>, open a new terminal and attach to that same running container.</p>
+    <pre><code># 1. find the running container's name
+docker ps
+
+# 2. open a second shell inside it
+docker exec -it &lt;name&gt; /bin/bash
+
+# 3. talk to the server
+redis-cli -p 6379</code></pre>
+
+    <h2 id="quickref">Quick reference</h2>
+    <table>
+      <tr><th>Task</th><th>Command</th></tr>
+      <tr><td>Build the Docker environment</td><td><code>docker compose build</code></td></tr>
+      <tr><td>Open a shell to write code / run the server</td><td><code>docker compose run --rm dev</code></td></tr>
+      <tr><td>Compile the project (inside container)</td><td><code>make</code></td></tr>
+      <tr><td>Start the server (inside container)</td><td><code>./photondb</code></td></tr>
+      <tr><td>List running containers (on host)</td><td><code>docker ps</code></td></tr>
+      <tr><td>Attach a second shell to the running container</td><td><code>docker exec -it &lt;name&gt; /bin/bash</code></td></tr>
+      <tr><td>Test the server with the Redis CLI</td><td><code>redis-cli -p 6379</code></td></tr>
+      <tr><td>Stop the server</td><td><code>Ctrl + C</code> in its terminal</td></tr>
+      <tr><td>Remove build output</td><td><code>make clean</code> (inside container)</td></tr>
+    </table>
+
+    <h2 id="where-to-edit">Where to edit code</h2>
+    <table>
+      <tr><th>Area</th><th>Location</th></tr>
+      <tr><td>Main server entry point</td><td><code>src/main.cpp</code></td></tr>
+      <tr><td>Configuration / AOF persistence</td><td><code>src/config.cpp</code>, <code>src/aof.cpp</code></td></tr>
+      <tr><td>Command handlers</td><td><code>lib/request-handler/</code></td></tr>
+      <tr><td>Core logic (store, RESP parser, router, RDB, streams)</td><td><code>lib/</code></td></tr>
+      <tr><td>Headers</td><td><code>include/</code></td></tr>
+    </table>
+  </section>
+
+  <!-- ARCHITECTURE -->
+  <section class="page" id="architecture">
+    <div class="breadcrumb">REFERENCE ›</div>
+    <h1 class="page-title">Architecture</h1>
+    <p class="lede">A request travels through three main layers before it touches the in-memory store.</p>
+
+    <h2 id="flow">Request flow</h2>
+    <pre><code>TCP socket
+   │
+   ▼
+RESP Parser        (include/resp-parser.h)
+   │  raw bytes → std::vector&lt;std::string&gt; tokens
+   ▼
+Request Router / Dispatcher   (include/request-router.h)
+   │  looks up the command name, dispatches to its handler
+   ▼
+Command Handler    (lib/request-handler/*.cpp)
+   │  reads/writes the store, builds a RESP reply
+   ▼
+Store              (include/store.h, include/stream-store.h)
+   │  in-memory hash map of keys, lists, and streams
+   ▼
+RESP-encoded reply written back to the socket</code></pre>
+
+    <h2 id="components">Core components</h2>
+    <div class="grid-cards">
+      <div class="card"><div class="k">RESP Parser / Encoder</div><div class="d">Converts raw socket bytes into command tokens, and encodes replies (bulk strings, arrays, integers) back into RESP.</div></div>
+      <div class="card"><div class="k">Dispatcher</div><div class="d">Routes a parsed command to the correct handler and manages transactions (<code>MULTI</code>/<code>EXEC</code>/<code>DISCARD</code>).</div></div>
+      <div class="card"><div class="k">Store</div><div class="d"><code>store.h</code> holds string and list keys with optional expiry; <code>stream-store.h</code> holds Redis-Streams-style entries.</div></div>
+      <div class="card"><div class="k">Persistence</div><div class="d"><code>RdbParser.hpp</code> and <code>aof.hpp</code> handle snapshotting and the append-only write log.</div></div>
+    </div>
+
+    <h2 id="tree">Directory layout</h2>
+    <pre><code>photon-db/
+├── src/                 # entry point, config, AOF, RDB glue
+├── lib/                 # implementation of core logic + handlers
+│   └── request-handler/ # one .cpp per Redis command
+├── include/             # headers for the above
+│   └── request-handler/
+├── frontend/             # Qt-based GUI client (Mainwindow.cpp/.h)
+├── Dockerfile
+├── docker-compose.yml
+└── Makefile</code></pre>
+    <p>There's also a small Qt <strong>frontend/</strong> — a desktop GUI client, separate from the server itself — under active development.</p>
+  </section>
+
+  <!-- COMMANDS -->
+  <section class="page" id="commands">
+    <div class="breadcrumb">REFERENCE ›</div>
+    <h1 class="page-title">Commands</h1>
+    <p class="lede">Every implemented command has a matching handler pair in <code>include/request-handler/</code> and <code>lib/request-handler/</code>. This list reflects the handlers currently in the repo.</p>
+
+    <h2 id="core-cmds">Core</h2>
+    <table>
+      <tr><th>Command</th><th>Handler file</th></tr>
+      <tr><td><code>PING</code></td><td><code>ping-command-handler.cpp</code></td></tr>
+      <tr><td><code>ECHO</code></td><td><code>echo-command-handler.cpp</code></td></tr>
+      <tr><td><code>GET</code></td><td><code>get-command-handler.cpp</code></td></tr>
+      <tr><td><code>SET</code></td><td><code>set-command-handler.cpp</code></td></tr>
+      <tr><td><code>TYPE</code></td><td><code>type-command-handler.cpp</code></td></tr>
+      <tr><td><code>INCR</code></td><td><code>incr-command-handler.cpp</code></td></tr>
+      <tr><td><code>DECR</code></td><td><code>decr-command-handler.cpp</code></td></tr>
+    </table>
+
+    <h2 id="list-cmds">Lists</h2>
+    <table>
+      <tr><th>Command</th><th>Handler file</th></tr>
+      <tr><td><code>RPUSH</code></td><td><code>rpush-handler.cpp</code></td></tr>
+      <tr><td><code>LPOP</code></td><td><code>list-commands/lpop-command-handler.cpp</code></td></tr>
+      <tr><td><code>LRANGE</code></td><td><code>list-commands/lrange-command-handler.cpp</code></td></tr>
+      <tr><td><code>LLEN</code></td><td><code>list-commands/llen-command-handler.cpp</code></td></tr>
+    </table>
+
+    <h2 id="stream-cmds">Streams</h2>
+    <table>
+      <tr><th>Command</th><th>Handler file</th></tr>
+      <tr><td><code>XADD</code></td><td><code>xadd-command-handler.cpp</code></td></tr>
+      <tr><td><code>XRANGE</code></td><td><code>xrange-command-handler.cpp</code></td></tr>
+      <tr><td><code>XREAD</code></td><td><code>xread-command-handler.cpp</code></td></tr>
+    </table>
+
+    <h2 id="tx-cmds">Transactions</h2>
+    <table>
+      <tr><th>Command</th><th>Handler file</th></tr>
+      <tr><td><code>MULTI</code></td><td><code>multi-command-handler.cpp</code></td></tr>
+      <tr><td><code>EXEC</code></td><td><code>exec-command-handler.cpp</code></td></tr>
+      <tr><td><code>DISCARD</code></td><td><code>discard-command-handler.cpp</code></td></tr>
+    </table>
+
+    <h2 id="example">Example session</h2>
+    <pre><code>127.0.0.1:6379&gt; SET user:1 aswin
+OK
+127.0.0.1:6379&gt; GET user:1
+"aswin"
+127.0.0.1:6379&gt; RPUSH tasks "write docs" "test streams"
+(integer) 2
+127.0.0.1:6379&gt; LRANGE tasks 0 -1
+1) "write docs"
+2) "test streams"
+127.0.0.1:6379&gt; XADD events * type login
+"1-0"</code></pre>
+  </section>
+
+  <!-- PERSISTENCE -->
+  <section class="page" id="persistence">
+    <div class="breadcrumb">REFERENCE ›</div>
+    <h1 class="page-title">Persistence — RDB &amp; AOF</h1>
+    <p class="lede">Photon DB supports two Redis-style persistence strategies so data can survive a restart.</p>
+
+    <h2 id="rdb">RDB snapshots</h2>
+    <p><code>RdbParser.hpp</code> / <code>Rdb.cpp</code> read and write point-in-time binary snapshots of the store — the same idea as Redis's <code>dump.rdb</code>.</p>
+
+    <h2 id="aof">Append-only file (AOF)</h2>
+    <p><code>aof.hpp</code> / <code>aof.cpp</code> log every write command as it happens, so the database can rebuild its state by replaying the log. The <code>appendonlydir/</code> folder in the repo holds the manifest for this log.</p>
+
+    <h2 id="config">Configuration</h2>
+    <p>Persistence behavior is wired up through <code>config.hpp</code> / <code>config.cpp</code> and <code>aofconfig.cpp</code>, which are read on startup in <code>main.cpp</code>.</p>
+  </section>
+
+  <!-- CONTRIBUTING -->
+  <section class="page" id="contributing">
+    <div class="breadcrumb">PROJECT ›</div>
+    <h1 class="page-title">Contributing</h1>
+    <p class="lede">Photon DB uses a standard fork → clone → branch → pull request workflow.</p>
+
+    <h2 id="cflow">Contribution flow</h2>
+    <pre><code>1. Fork the repo on GitHub
+2. Clone your fork
+   git clone git@github.com:&lt;you&gt;/photon-db.git
+
+3. Create a branch
+   git checkout -b feature/my-change
+
+4. Make your change, build inside Docker, and test with redis-cli
+
+5. Commit and push
+   git push origin feature/my-change
+
+6. Open a Pull Request against AmritPant/photon-db</code></pre>
+
+    <h2 id="add-command">Adding a new command</h2>
+    <p>Each command is a self-contained handler pair:</p>
+    <ul>
+      <li>Header in <code>include/request-handler/&lt;name&gt;-command-handler.h</code></li>
+      <li>Implementation in <code>lib/request-handler/&lt;name&gt;-command-handler.cpp</code></li>
+      <li>Registered in the dispatcher, <code>include/request-router.h</code></li>
+    </ul>
+    <p>List-type commands follow the same pattern one folder deeper, under <code>request-handler/list-commands/</code>.</p>
+  </section>
+
+  <!-- TROUBLESHOOTING -->
+  <section class="page" id="troubleshoot">
+    <div class="breadcrumb">PROJECT ›</div>
+    <h1 class="page-title">Troubleshooting</h1>
+    <p class="lede">Common problems the team has run into, and how to fix them.</p>
+
+    <h3>"Cannot connect to Docker"</h3>
+    <p>Open Docker Desktop and wait until it reports it's fully running, then try the command again.</p>
+
+    <h3>"Port 6379 already in use"</h3>
+    <p>Something else on your machine is bound to that port. Stop it, or change <code>6379:6379</code> to something like <code>6380:6379</code> in <code>docker-compose.yml</code>.</p>
+
+    <h3><code>docker ps</code> shows nothing</h3>
+    <p>Make sure the container from the "run the server" step is still open in its own terminal, with <code>./photondb</code> running.</p>
+
+    <h3>Build is slow the first time</h3>
+    <p>Normal — Docker is downloading the compiler and libraries. Subsequent builds are much faster since layers are cached.</p>
+
+    <div class="warn">⚠️ Push permission errors on the shared repo are usually an SSH key issue — make sure your key is added to your GitHub account and you're cloning with the <code>git@github.com:...</code> SSH URL, not HTTPS.</div>
+  </section>
+
+</div>
+
+<div class="toc" id="toc"></div>
+</div>
+
+<script>
+  const tocMap = {
+    quickstart: ['what-is:What is Photon DB?','try-it:Try it in 60 seconds'],
+    install: ['requirements:Requirements','step1:Step 1 — Get the code','step2:Step 2 — Build the environment','step3:Step 3 — Start the server'],
+    workflow: ['second-shell:Connecting a second shell','quickref:Quick reference','where-to-edit:Where to edit code'],
+    architecture: ['flow:Request flow','components:Core components','tree:Directory layout'],
+    commands: ['core-cmds:Core','list-cmds:Lists','stream-cmds:Streams','tx-cmds:Transactions','example:Example session'],
+    persistence: ['rdb:RDB snapshots','aof:Append-only file','config:Configuration'],
+    contributing: ['cflow:Contribution flow','add-command:Adding a new command'],
+    troubleshoot: []
+  };
+
+  function go(id){
+    document.querySelectorAll('.page').forEach(p=>p.classList.remove('active'));
+    document.getElementById(id).classList.add('active');
+    document.querySelectorAll('.side-link').forEach(l=>l.classList.remove('active'));
+    const link = [...document.querySelectorAll('.side-link')].find(l=>l.getAttribute('onclick')===`go('${id}')`);
+    if(link) link.classList.add('active');
+    document.getElementById('content').scrollTop = 0;
+    window.scrollTo(0,0);
+    renderToc(id);
+    document.querySelector('.sidebar').classList.remove('open');
+  }
+
+  function renderToc(id){
+    const toc = document.getElementById('toc');
+    const items = tocMap[id] || [];
+    if(!items.length){ toc.innerHTML=''; return; }
+    toc.innerHTML = '<div class="toc-title">On this page</div>' +
+      items.map(i=>{
+        const [anchor,label] = i.split(':');
+        return `<a href="#${anchor}" onclick="setTimeout(()=>highlightToc('${anchor}'),50)">${label}</a>`;
+      }).join('');
+  }
+  function highlightToc(anchor){
+    document.querySelectorAll('.toc a').forEach(a=>a.classList.remove('active'));
+    const a = [...document.querySelectorAll('.toc a')].find(a=>a.getAttribute('href')==='#'+anchor);
+    if(a) a.classList.add('active');
+  }
+
+  // init
+  renderToc('quickstart');
+</script>
+
+</body>
+</html>
